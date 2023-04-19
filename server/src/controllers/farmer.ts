@@ -17,7 +17,7 @@ export default class FarmerController {
     offset: number = 0,
     limit: number = 10,
   ): Promise<IFarmer[]> {
-    if (!supportedLanguages.includes(language)) {
+    if (!['en', ...supportedLanguages].includes(language)) {
       throw new Error(`Language ${language} not supported`);
     }
 
