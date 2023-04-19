@@ -7,7 +7,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axiosInstance.get('/hello');
+      const response = await axiosInstance.get('/health');
       setMessage(response.data.message);
     };
 

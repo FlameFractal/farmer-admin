@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": ["@typescript-eslint"],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
@@ -11,7 +11,7 @@
       }
     }
   },
-  "extends": ["airbnb", "airbnb/hooks", "prettier"],
+  "extends": ["airbnb", "airbnb/hooks"],
   "globals": {
     "JSX": "readonly",
     "browser": true
@@ -46,8 +46,6 @@
         "extensions": [".jsx", ".tsx"]
       }
     ],
-
-    "prettier/prettier": "error",
 
     "no-plusplus": "off",
     "no-use-before-define": "off",

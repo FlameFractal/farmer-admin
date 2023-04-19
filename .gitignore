@@ -18,3 +18,9 @@ coverage
 # Ignore IDE specific files
 .idea
 .vscode
+
+# Ignore files upload directory
+uploads
+
+# Ignore macOS specific files
+.DS_Store
