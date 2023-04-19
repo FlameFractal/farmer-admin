@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import FarmersList from './FarmersList';
 import UploadCsv from './UploadCsv';
 
-export default function HomePage() {
+export default function HomePage({ onLogout }: { onLogout: () => void }) {
   const [selectedOption, setSelectedOption] = useState<'upload' | 'list'>('list');
 
   return (
@@ -14,6 +14,10 @@ export default function HomePage() {
 
         <button type="button" onClick={() => setSelectedOption('upload')}>
           Upload CSV
+        </button>
+
+        <button type="button" onClick={onLogout}>
+          Logout
         </button>
       </div>
       <div>

@@ -4,34 +4,47 @@ dotenv.config();
 
 import cors from 'cors';
 import multer from 'multer';
-import express from 'express';
+import jwt from 'jsonwebtoken';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
 import FarmerController from './controllers/farmer';
+import AuthController from './controllers/auth';
+import bodyParser from 'body-parser';
 
-const port = process.env.PORT || 5656;
+const port = process.env.API_PORT || 5656;
 const upload = multer({ dest: 'uploads/' });
 const app = express();
 
 // Declare the API routes
 
-app.use(cors());
-
 app.get('/health', (_, res) => {
   res.status(200).send({ message: 'Health check pass!' });
 });
 
-app.get('/farmers/:phone_number', async (req, res) => {
+app.use(cors());
+app.use(bodyParser.json());
+
+app.post('/auth/login', async (req, res) => {
   try {
-    if (!req.params.phone_number) {
-      throw new Error('No phone number provided');
+    if (!req.body || !req.body.username || !req.body.password) {
+      throw new Error('No username or password provided');
     }
 
-    const farmer = await FarmerController.getFarmer(req.params.phone_number);
-    res.status(200).send(farmer);
+    const token = await AuthController.login(
+      req.body.username as string,
+      req.body.password as string,
+    );
+
+    res.status(200).send({ token });
   } catch (error: any) {
-    res.status(500).send({ message: `Error getting farmer! ${error.message}` });
+    console.error(error);
+    res.status(500).send({ message: `Error logging in! ${error.message}` });
   }
+});
+
+app.get('/auth/me', authMiddleware, async (_, res) => {
+  res.send({ username: 'admin' });
 });
 
 app.get('/farmers', async (req, res) => {
@@ -48,7 +61,7 @@ app.get('/farmers', async (req, res) => {
 });
 
 // TODO: Took 20 seconds to upload 500 farmers, and was non-blocking to other API requests
-app.post('/farmers', upload.single('farmer-data'), async (req, res) => {
+app.post('/farmers', authMiddleware, upload.single('farmer-data'), async (req, res) => {
   try {
     if (!req.file) {
       throw new Error('No file uploaded');
@@ -79,3 +92,14 @@ app.post('/farmers', upload.single('farmer-data'), async (req, res) => {
     console.error(error);
   }
 })();
+
+function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] || '';
+    jwt.verify(token, process.env.JWT_SECRET || '');
+    next();
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ message: 'Invalid token' });
+  }
+}
