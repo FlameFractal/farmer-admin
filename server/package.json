@@ -3,9 +3,14 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
-    "start": "nodemon --watch 'src/**/*' --ext 'ts,json' --exec 'ts-node' src/index.ts",
-    "test": "echo 'No tests yet.'"
+    "dev": "nodemon --watch 'src/**/*' --ext 'ts,json' --exec 'ts-node' src/index.ts",
+    "postinstall": "yarn build",
+    "build": "tsc",
+    "start": "node build/index.js"
   },
   "dependencies": {
     "@google-cloud/translate": "^7.2.1",

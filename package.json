@@ -1,0 +1,12 @@
+{
+  "name": "farmer-admin",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": "16.x"
+  }
+}

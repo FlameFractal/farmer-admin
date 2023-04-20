@@ -1,29 +1,29 @@
+/* eslint-disable import/first */
 import fs from 'fs';
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 import cors from 'cors';
 import multer from 'multer';
 import jwt from 'jsonwebtoken';
-import express, { NextFunction, Request, Response } from 'express';
+import * as dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import express, { NextFunction, Request, Response } from 'express';
+
+dotenv.config();
 
 import FarmerController from './controllers/farmer';
 import AuthController from './controllers/auth';
-import bodyParser from 'body-parser';
 
-const port = process.env.API_PORT || 5656;
+const port = process.env.PORT || 5656;
 const upload = multer({ dest: 'uploads/' });
 const app = express();
+app.use(cors());
+app.use(bodyParser.json());
 
 // Declare the API routes
 
 app.get('/health', (_, res) => {
   res.status(200).send({ message: 'Health check pass!' });
 });
-
-app.use(cors());
-app.use(bodyParser.json());
 
 app.post('/auth/login', async (req, res) => {
   try {
@@ -43,7 +43,18 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-app.get('/auth/me', authMiddleware, async (_, res) => {
+// Authentication middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] || '';
+    jwt.verify(token, process.env.JWT_SECRET || '');
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+app.get('/auth/me', async (_, res) => {
   res.send({ username: 'admin' });
 });
 
@@ -60,8 +71,8 @@ app.get('/farmers', async (req, res) => {
   }
 });
 
-// TODO: Took 20 seconds to upload 500 farmers, and was non-blocking to other API requests
-app.post('/farmers', authMiddleware, upload.single('farmer-data'), async (req, res) => {
+// TODO: Took 20 seconds to upload 500 farmers
+app.post('/farmers', upload.single('farmer-data'), async (req, res) => {
   try {
     if (!req.file) {
       throw new Error('No file uploaded');
@@ -92,14 +103,3 @@ app.post('/farmers', authMiddleware, upload.single('farmer-data'), async (req, r
     console.error(error);
   }
 })();
-
-function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  try {
-    const token = req.headers.authorization?.split(' ')[1] || '';
-    jwt.verify(token, process.env.JWT_SECRET || '');
-    next();
-  } catch (error) {
-    console.log(error);
-    res.status(401).json({ message: 'Invalid token' });
-  }
-}

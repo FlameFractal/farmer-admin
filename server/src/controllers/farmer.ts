@@ -7,11 +7,6 @@ const supportedLanguages = ['hi', 'mr', 'te', 'pa'];
 const googleTranslateSegmentsLimit = 128;
 
 export default class FarmerController {
-  static async getFarmer(phone_number: string): Promise<IFarmer | null> {
-    const farmer = await Farmer.findOne({ phone_number });
-    return farmer;
-  }
-
   static async getFarmersByLanguage(
     language: string = 'en',
     offset: number = 0,

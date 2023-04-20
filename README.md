@@ -1,6 +1,6 @@
-# Farmer Translator
+# Farmer Admin
 
-This project is a web app that allows admin users to translate farmer data. The translated data is stored and can be queried by language.
+This project is a basic MERN web app that allows admin users to bulk upload, translate, store and query data.
 
 ## Key Features
 
@@ -12,9 +12,8 @@ This project is a web app that allows admin users to translate farmer data. The 
 ## Future Improvements
 
 - Upload CSV file to S3 using presigned url.
-- Use a message queue for larger CSV files.
-- Async processing in upload API. Websocket for sucess notification.
-- Logging, metrics, error messages
+- Async processing for large CSV files using message queues. Websocket for sucess notification.
+- Logging, metrics, errors.
 - Implement search on farmer data.
 
 ## Tech Stack
@@ -31,14 +30,53 @@ This project is a web app that allows admin users to translate farmer data. The 
 - Clone the repository: `git clone https://github.com/flamefractal/farmer-admin.git`.
 - Install dependencies by running `yarn install` in both the client and server directories.
 - Create a `.env` file in the `server` directory with the following variables:
-
-  - `API_PORT`
+  - `PORT`
   - `MONGODB_CONNECTION_URI`
   - `JWT_SECRET`
   - `GOOGLE_TRANSLATE_API_KEY`
+- Create a `.env` file in the `client` directory with the following variables:
 
-- Start the server by running `yarn start` in both the server and the client directory.
+  - `REACT_APP_API_BASE_URL`
+
+- Start the server by running `yarn dev` in both the server and the client directory.
 - Access the app at http://localhost:3000.
+
+## Deploying to Heroku
+
+### Deploying
+
+```
+git push heroku-server branch:main
+git push heroku-client branch:main
+heroku logs --tail --app farmer-admin-server
+heroku logs --tail --app farmer-admin-client
+```
+
+### Setup
+
+- Create a Heroku app for the server and the client. Add the buildpacks
+  ```
+  heroku create -region eu -a farmer-admin-server -r heroku-server
+  heroku create -region eu -a farmer-admin-client -r heroku-client
+  heroku buildpacks:add -a farmer-admin-server heroku/nodejs
+  heroku buildpacks:add -a farmer-admin-server heroku-community/multi-procfile
+  heroku buildpacks:add -a farmer-admin-client heroku/nodejs
+  heroku buildpacks:add -a farmer-admin-client heroku-community/multi-procfile
+  ```
+  - Add the env variables to the config vars of each app, including `PROCFILE`.
+
+We need to make sure that we can build the typescript code of server. And we can build the typescript code and the react code of the client. We also need a web server to serve the client code. Heroku flow: detect env -> postinstall -> build -> Procfile -> start
+
+- Small changes
+  - Create a `package.json` in the root with yarn workspaces mentioned.
+  - Add `engines` to all the `package.json` files.
+  - Commit `yarn.lock`, Heroku needs it to identify the env.
+  - Add `REACT_APP_API_BASE_URL` env variable to the client code.
+  - Add `PORT` env variable to the server code
+- Add Procfiles to the server and client directories
+  - `web: yarn workspace server start`, `web: yarn workspace client start`
+  - Add `serve` package to the client code (can use simple http server or express as well)
+  - Add `postinstall`, `build`, `start` scripts to the `package.json` files.
 
 ## API Endpoints
 
