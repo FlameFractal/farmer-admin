@@ -2,6 +2,21 @@
 
 This project is a basic MERN web app that allows admin users to bulk upload, translate, store and query data.
 
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Future Improvements](#future-improvements)
+- [Tech Stack](#tech-stack)
+- [Local Setup](#local-setup)
+- [Deploying to Heroku](#deploying-to-heroku)
+- [API Endpoints](#api-endpoints)
+  - [1. GET /farmers?language={language}&offset={offset}&limit={limit}](#1-get-farmerslanguagelanguageoffsetoffsetlimitlimit)
+  - [2. POST /farmers](#2-post-farmers)
+  - [3. POST /auth/login](#3-post-authlogin)
+  - [4. GET /auth/me](#4-get-authme)
+  - [5. GET /health](#5-get-health)
+- [License](#license)
+
 ## Key Features
 
 - Translation using Google Translate API.
@@ -25,7 +40,7 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 - Google Cloud Translate
 - Tooling (yarn, typescript, eslint, prettier)
 
-## Installation
+## Local Setup
 
 - Clone the repository: `git clone https://github.com/flamefractal/farmer-admin.git`.
 - Install dependencies by running `yarn install` in both the client and server directories.
