@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable import/first */
 import fs from 'fs';
 import cors from 'cors';
@@ -38,7 +39,6 @@ app.post('/auth/login', async (req, res) => {
 
     res.status(200).send({ token });
   } catch (error: any) {
-    console.error(error);
     res.status(500).send({ message: `Error logging in! ${error.message}` });
   }
 });
@@ -49,13 +49,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1] || '';
     jwt.verify(token, process.env.JWT_SECRET || '');
     next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+  } catch (error: any) {
+    res.status(401).json({ message: `Invalid token. ${error.message}` });
   }
 });
 
 app.get('/auth/me', async (_, res) => {
   res.send({ username: 'admin' });
+});
+
+app.get('/farmers/count', async (req, res) => {
+  try {
+    const count = await FarmerController.getFarmersCount();
+    res.status(200).send({ count });
+  } catch (error: any) {
+    res.status(500).send({ message: `Error getting farmers count! ${error.message}` });
+  }
 });
 
 app.get('/farmers', async (req, res) => {
@@ -98,8 +107,7 @@ app.post('/farmers', upload.single('farmer-data'), async (req, res) => {
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });
-  } catch (error) {
-    console.error('Error connecting to the database!');
-    console.error(error);
+  } catch (error: any) {
+    console.error(`Error connecting to the database! ${error.message}`);
   }
 })();

@@ -1,5 +1,7 @@
+/* eslint-disable import/prefer-default-export */
 import fs from 'fs';
 import csv from 'csv-parser';
+import { Express } from 'express';
 
 export async function parseCSV(file: Express.Multer.File): Promise<any[]> {
   const records: any[] = [];

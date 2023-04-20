@@ -8,5 +8,8 @@
   ],
   "engines": {
     "node": "16.x"
+  },
+  "scripts": {
+    "lint": "yarn workspaces foreach --parallel eslint . --ext .ts,.tsx"
   }
 }

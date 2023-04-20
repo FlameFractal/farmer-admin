@@ -1,3 +1,7 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
+import { Express } from 'express';
+
 import Farmer from '../models/farmer';
 import { IFarmer, IFarmerCSV } from '../interfaces';
 import { translateWords } from '../utilities/gapis';
@@ -7,6 +11,10 @@ const supportedLanguages = ['hi', 'mr', 'te', 'pa'];
 const googleTranslateSegmentsLimit = 128;
 
 export default class FarmerController {
+  static async getFarmersCount(): Promise<number> {
+    return Farmer.countDocuments();
+  }
+
   static async getFarmersByLanguage(
     language: string = 'en',
     offset: number = 0,
@@ -56,6 +64,8 @@ export default class FarmerController {
         district_name: farmer.district_name,
         village_name: farmer.village_name,
         translations: new Map([
+          // Duplicating english data will help simplify clients
+          // We need it outside anyway for filtering, search etc features
           [
             'en',
             {

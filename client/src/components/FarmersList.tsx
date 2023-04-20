@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box, Table, TableBody, TableCell, TableHead, TableRow,
+  Typography, Select, MenuItem, Button, Grid, TextField, ButtonGroup,
+} from '@mui/material';
 import axios from '../axiosConfig';
 import { IFarmer, LanguageCodesToNames } from '../interfaces';
 
-const perPage = 15;
+const perPage = 10;
 
 export default function FarmersList() {
   const [language, setLanguage] = useState<string>('en');
   const [farmers, setFarmers] = useState<IFarmer[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [isLoading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
+  const [pageNumberInput, setPageNumberInput] = useState<string>('1');
+
+  useEffect(() => {
+    axios.get('/farmers/count')
+      .then((response) => {
+        setTotalCount(response.data.count);
+      });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -19,70 +32,108 @@ export default function FarmersList() {
       })
       .finally(() => {
         setLoading(false);
+        setPageNumberInput(page.toString());
       });
   }, [language, page]);
 
   let content = null;
 
-  if (loading) {
-    content = <tr><td colSpan={6}>Loading...</td></tr>;
-  } else if (farmers.length > 0) {
-    content = farmers.map((farmer) => (
-      <tr key={farmer.phone_number}>
-        <td>{farmer.phone_number}</td>
-        <td>{(farmer.translations[language] ?? {}).farmer_name}</td>
-        <td>{(farmer.translations[language] ?? {}).state_name}</td>
-        <td>{(farmer.translations[language] ?? {}).district_name}</td>
-        <td>{(farmer.translations[language] ?? {}).village_name}</td>
-      </tr>
+  if (farmers.length > 0) {
+    content = farmers.map((farmer, index) => (
+      <TableRow key={farmer.phone_number}>
+        <TableCell>{ (page - 1) * perPage + (index + 1) }</TableCell>
+        <TableCell>{farmer.phone_number}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? {}).farmer_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? {}).state_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? {}).district_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? {}).village_name}</TableCell>
+      </TableRow>
     ));
   } else {
-    content = <tr><td colSpan={6}>No farmers found.</td></tr>;
+    content = <TableRow><TableCell colSpan={5}>No farmers found.</TableCell></TableRow>;
   }
 
   return (
-    <div className="farmers-list">
-      <h2>Farmers List</h2>
-
-      <div style={{ marginBottom: 10 }}>
-        <span>Select language:</span>
-
-        <select
+    <Box className="farmers-list" sx={{ maxWidth: '70%' }}>
+      <Box display="flex" alignItems="center" mb={2}>
+        <Typography variant="body1" mr={1}>Select language:</Typography>
+        <Select
+          sx={{
+            minHeight: '10px',
+          }}
           value={language}
           onChange={(e) => {
             setLanguage(e.target.value);
-            setPage(1);
           }}
         >
           {Object.entries(LanguageCodesToNames).map(([code, name]) => (
-            <option key={code} value={code}>{name}</option>
+            <MenuItem key={code} value={code}>{name}</MenuItem>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Box>
 
-      <table style={{ marginBottom: 10 }}>
-        <thead>
-          <tr>
-            <th>Phone Number</th>
-            <th>Farmer Name</th>
-            <th>State Name</th>
-            <th>District Name</th>
-            <th>Village Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {content}
-        </tbody>
-      </table>
+      <Box sx={{ minHeight: '20rem' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>S. No.</TableCell>
+              <TableCell>Phone Number</TableCell>
+              <TableCell>Farmer Name</TableCell>
+              <TableCell>State Name</TableCell>
+              <TableCell>District Name</TableCell>
+              <TableCell>Village Name</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {content}
+          </TableBody>
+        </Table>
+      </Box>
 
-      <div>
-        <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-          Previous Page
-        </button>
-        <button type="button" disabled={farmers.length < perPage} onClick={() => setPage(page + 1)}>
-          Next Page
-        </button>
-      </div>
-    </div>
+      <Typography variant="body1" mr={1} mt={2}>
+        Total Count:
+        {' '}
+        {totalCount}
+
+        {isLoading && ' (Loading...)'}
+      </Typography>
+
+      <Grid container spacing={2} mt={1}>
+        <Grid item>
+          <Button variant="contained" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+            Previous Page
+          </Button>
+        </Grid>
+
+        <Grid item>
+          <Button variant="contained" disabled={farmers.length < perPage} onClick={() => setPage(page + 1)}>
+            Next Page
+          </Button>
+        </Grid>
+
+        <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
+          <ButtonGroup variant="outlined">
+            <Button variant="contained" disabled={page === Number(pageNumberInput)} onClick={() => setPage(Number(pageNumberInput))}>
+              Jump To Page
+            </Button>
+
+            <TextField
+              type="number"
+              size="small"
+              value={pageNumberInput}
+              onChange={(e) => setPageNumberInput(e.target.value)}
+              style={{ width: '4rem' }}
+              InputProps={{ inputProps: { min: 1, max: Math.ceil(totalCount / perPage) } }}
+            />
+
+            <Typography variant="body1" ml={1} sx={{ alignSelf: 'center' }}>
+              of
+              {' '}
+              {Math.ceil(totalCount / perPage)}
+            </Typography>
+          </ButtonGroup>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

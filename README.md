@@ -19,25 +19,49 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 
 ## Key Features
 
-- Translation using Google Translate API.
-- Bulk process by uploading CSV file.
-- View paginated data.
-- Auth using JWT.
+- Functional
+  - Translation using Google Cloud Translation API.
+  - Bulk process by uploading CSV file.
+  - Responsive webapp to view paginated data.
+- Technical
+  - Auth using JWT
+  - Monorepo with microservice client and server
+  - Processing large by chunking (Translate API limit of 128 tokens).
+  - Typescript for type safety
 
 ## Future Improvements
 
-- Upload CSV file to S3 using presigned url.
-- Async processing for large CSV files using message queues. Websocket for sucess notification.
-- Logging, metrics, errors.
-- Implement search on farmer data.
+- Functional
+  - Use transliteration for better results for proper nouns.
+    - Forcing `"from:en"` helps somewhat.
+    - Google's Transliteration API is deprecated.
+  - Validating english data against government database of cities, distrcts, villages.
+  - Returning CSV of records that failed to upsert.
+  - Allowing users to filter farmer data based on names, cities, etc.
+  - Full text search on farmer data using Atlas Search (ElasticSearch).
+  - Allowing admin users to edit farmer data.
+  - User module with registration, hashed stored passwords, and roles.
+  - Server side session management with cache using Redis.
+- Performance
+  - Large CSV file
+    - Upload CSV file from client to S3 using presigned url.
+    - Async process large CSV files using worker and message queue
+    - Websocket for sucess notification.
+  - Server and database within same VPC in a single region
+- Deployment
+  - Dockerize and deploy server on AWS ECS
+  - Deploy client on AWS S3 and Cloudfront CDN (Edge location caching)
+  - Middlewares - logging, metrics, errors
+  - Tests, CI/CD
 
 ## Tech Stack
 
 - Typescript
-- NodeJS
-- ReactJS
+- NodeJS (Express)
+- ReactJS (Material UI)
 - MongoDB (Atlas)
-- Google Cloud Translate
+- Google Cloud (Translate API)
+- Heroku
 - Tooling (yarn, typescript, eslint, prettier)
 
 ## Local Setup
@@ -46,8 +70,9 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 - Install dependencies by running `yarn install` in both the client and server directories.
 - Create a `.env` file in the `server` directory with the following variables:
   - `PORT`
-  - `MONGODB_CONNECTION_URI`
   - `JWT_SECRET`
+  - `MASTER_PASSWORD`
+  - `MONGODB_CONNECTION_URI`
   - `GOOGLE_TRANSLATE_API_KEY`
 - Create a `.env` file in the `client` directory with the following variables:
 
@@ -127,26 +152,30 @@ Response
 ]
 ```
 
-### 2. POST /farmers
+### 2. GET /farmers/count
+
+Get total count of farmers in the database
+
+### 3. POST /farmers
 
 Upload a CSV file of farmer data to be translated.
 
 Request: Form-data with the CSV file containing the farmer data
 
-### 3. POST /auth/login
+### 4. POST /auth/login
 
 Authenticate the user and generate a JWT token.
 
 Request `{ "username": "admin", "password": "password" }`
 Response `{ "token": "eyJhbGciOiJ..." }`
 
-### 4. GET /auth/me
+### 5. GET /auth/me
 
 Get the current user's details based on JWT in Authorization header.
 
 Response `{"username": "admin"}`
 
-### 5. GET /health
+### 6. GET /health
 
 Check the health of the API.
 
