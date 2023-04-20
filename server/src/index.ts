@@ -43,6 +43,23 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+app.post('/auth/register', async (req, res) => {
+  try {
+    if (!req.body || !req.body.username || !req.body.password) {
+      throw new Error('No username or password provided');
+    }
+
+    const user = await AuthController.createUser({
+      username: req.body.username as string,
+      password: req.body.password as string,
+    });
+
+    res.status(200).send(user);
+  } catch (error: any) {
+    res.status(500).send({ message: `Error registering user! ${error.message}` });
+  }
+});
+
 // Authentication middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   try {

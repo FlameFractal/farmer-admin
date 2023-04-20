@@ -40,7 +40,7 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
   - Allowing users to filter farmer data based on names, cities, etc.
   - Full text search on farmer data using Atlas Search (ElasticSearch).
   - Allowing admin users to edit farmer data.
-  - User module with registration, hashed stored passwords, and roles.
+  - User roles (RBAC).
   - Server side session management with cache using Redis.
 - Performance
   - Large CSV file
@@ -69,11 +69,11 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 - Clone the repository: `git clone https://github.com/flamefractal/farmer-admin.git`.
 - Install dependencies by running `yarn install` in both the client and server directories.
 - Create a `.env` file in the `server` directory with the following variables:
-  - `PORT`
+  - `API_PORT=5656`
   - `JWT_SECRET`
-  - `MASTER_PASSWORD`
-  - `MONGODB_CONNECTION_URI`
+  - `MONGODB_CONNECTION_URI=mongodb://localhost:27017/farmer-admin`
   - `GOOGLE_TRANSLATE_API_KEY`
+  - `PROCFILE=server/Procfile`
 - Create a `.env` file in the `client` directory with the following variables:
 
   - `REACT_APP_API_BASE_URL`
@@ -167,7 +167,14 @@ Request: Form-data with the CSV file containing the farmer data
 Authenticate the user and generate a JWT token.
 
 Request `{ "username": "admin", "password": "password" }`
+
 Response `{ "token": "eyJhbGciOiJ..." }`
+
+### 4. POST /auth/register
+
+Create a new admin user.
+
+Request `{ "username": "admin", "password": "password" }`
 
 ### 5. GET /auth/me
 

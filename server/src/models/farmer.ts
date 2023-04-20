@@ -2,22 +2,11 @@ import mongoose from 'mongoose';
 import { IFarmer } from '../interfaces';
 
 const farmerSchema = new mongoose.Schema<IFarmer>({
-  phone_number: {
-    type: String,
-    required: true,
-  },
-  farmer_name: {
-    type: String,
-  },
-  state_name: {
-    type: String,
-  },
-  district_name: {
-    type: String,
-  },
-  village_name: {
-    type: String,
-  },
+  phone_number: { type: String, required: true },
+  farmer_name: { type: String },
+  state_name: { type: String },
+  district_name: { type: String },
+  village_name: { type: String },
   translations: {
     type: Map,
     of: {
