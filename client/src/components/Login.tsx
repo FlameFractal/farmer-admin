@@ -25,7 +25,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       localStorage.setItem('token', token);
       onLogin();
     } catch (err: any) {
-      setMessage(`An error occured. ${err?.response?.data?.message}`);
+      setMessage(err?.response?.data?.message);
     }
   };
 

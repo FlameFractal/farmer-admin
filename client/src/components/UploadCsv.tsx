@@ -34,7 +34,7 @@ export default function UploadCsv() {
 
       setMessage(`File ${file.name} uploaded successfully!`);
     } catch (err: any) {
-      setMessage(`An error occurred. ${err.message}`);
+      setMessage(`${err?.response?.data?.message}. Please check the format of the CSV file.`);
     } finally {
       setIsUploading(false);
       setFile(null);
@@ -57,26 +57,34 @@ export default function UploadCsv() {
         </Typography>
       </Grid>
 
-      {isUploading ? <CircularProgress /> : (
-        <Grid item xs={12}>
-          <label htmlFor="csv-file-input" style={{ display: 'inline-block' }}>
-            <Button component="span" variant="contained" sx={{ mt: 1 }}>
-              {file ? file.name : 'Select File'}
-            </Button>
-            <input
-              id="csv-file-input"
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-          </label>
+      <Grid item xs={12}>
+        {isUploading ? (
+          <Typography variant="body1" component="div" color="text.secondary" sx={{ mt: 2 }}>
+            Uploading...
+            <CircularProgress />
+          </Typography>
+        ) : (
 
-          <Button variant="contained" disabled={!file} onClick={handleFileUpload} sx={{ mt: 1, ml: 1 }}>
-            Upload
-          </Button>
-        </Grid>
-      )}
+          <>
+            <label htmlFor="csv-file-input" style={{ display: 'inline-block' }}>
+              <Button component="span" variant="contained" sx={{ mt: 1 }}>
+                {file ? file.name : 'Select File'}
+              </Button>
+              <input
+                id="csv-file-input"
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+
+            <Button variant="contained" disabled={!file} onClick={handleFileUpload} sx={{ mt: 1, ml: 1 }}>
+              Upload
+            </Button>
+          </>
+        )}
+      </Grid>
 
       <Grid item xs={12}>
         {message && <Typography variant="body1" component="div" color="text.secondary" sx={{ mt: 2 }}>{message}</Typography>}

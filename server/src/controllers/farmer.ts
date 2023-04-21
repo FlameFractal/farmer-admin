@@ -15,22 +15,8 @@ export default class FarmerController {
     return Farmer.countDocuments();
   }
 
-  static async getFarmersByLanguage(
-    language: string = 'en',
-    offset: number = 0,
-    limit: number = 10,
-  ): Promise<IFarmer[]> {
-    if (!['en', ...supportedLanguages].includes(language)) {
-      throw new Error(`Language ${language} not supported`);
-    }
-
-    return Farmer.find(
-      { [`translations.${language}`]: { $exists: true } },
-      { phone_number: 1, [`translations.${language}`]: 1 },
-    )
-      .sort({ _id: 1 })
-      .skip(offset)
-      .limit(limit);
+  static async getFarmers(offset: number = 0, limit: number = 10): Promise<IFarmer[]> {
+    return Farmer.find({}).sort({ _id: 1 }).skip(offset).limit(limit);
   }
 
   static async upsertFarmersCSV(file: Express.Multer.File): Promise<void> {
@@ -63,19 +49,7 @@ export default class FarmerController {
         state_name: farmer.state_name,
         district_name: farmer.district_name,
         village_name: farmer.village_name,
-        translations: new Map([
-          // Duplicating english data will help simplify clients
-          // We need it outside anyway for filtering, search etc features
-          [
-            'en',
-            {
-              farmer_name: farmer.farmer_name,
-              state_name: farmer.state_name,
-              district_name: farmer.district_name,
-              village_name: farmer.village_name,
-            },
-          ],
-        ]),
+        translations: new Map(),
       };
     });
 

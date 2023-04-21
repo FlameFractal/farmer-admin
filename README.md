@@ -2,6 +2,8 @@
 
 This project is a basic MERN web app that allows admin users to bulk upload, translate, store and query data.
 
+It is deployed online at https://farmer-admin-client.herokuapp.com/.
+
 ## Table of Contents
 
 - [Key Features](#key-features)
@@ -10,24 +12,27 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 - [Local Setup](#local-setup)
 - [Deploying to Heroku](#deploying-to-heroku)
 - [API Endpoints](#api-endpoints)
-  - [1. GET /farmers?language={language}&offset={offset}&limit={limit}](#1-get-farmerslanguagelanguageoffsetoffsetlimitlimit)
-  - [2. POST /farmers](#2-post-farmers)
-  - [3. POST /auth/login](#3-post-authlogin)
-  - [4. GET /auth/me](#4-get-authme)
-  - [5. GET /health](#5-get-health)
+  - [1. GET /farmers?offset={offset}&limit={limit}](#1-get-farmersoffsetoffsetlimitlimit)
+  - [2. GET /farmers/count](#2-get-farmerscount)
+  - [3. POST /farmers](#3-post-farmers)
+  - [4. POST /auth/login](#4-post-authlogin)
+  - [5. POST /auth/register](#5-post-authregister)
+  - [6. GET /auth/me](#6-get-authme)
+  - [7. GET /health](#7-get-health)
 - [License](#license)
 
 ## Key Features
 
 - Functional
-  - Translation using Google Cloud Translation API.
+  - Idempotent upsert of farmer data.
   - Bulk process by uploading CSV file.
+  - Translation using Google Cloud Translation API.
   - Responsive webapp to view paginated data.
 - Technical
   - Auth using JWT
   - Monorepo with microservice client and server
-  - Processing large by chunking (Translate API limit of 128 tokens).
-  - Typescript for type safety
+  - Overcoming Translate API's limit of 128 tokens by chunking.
+  - Typescript for type safety and bug prevention.
 
 ## Future Improvements
 
@@ -37,17 +42,22 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
     - Google's Transliteration API is deprecated.
   - Validating english data against government database of cities, distrcts, villages.
   - Returning CSV of records that failed to upsert.
+  - Allow exporting of farmer data.
+  - Allowing admin users to edit farmer data.
   - Allowing users to filter farmer data based on names, cities, etc.
   - Full text search on farmer data using Atlas Search (ElasticSearch).
-  - Allowing admin users to edit farmer data.
-  - User roles (RBAC).
-  - Server side session management with cache using Redis.
+  - Server side session management with Redis.
 - Performance
   - Large CSV file
     - Upload CSV file from client to S3 using presigned url.
-    - Async process large CSV files using worker and message queue
+    - Async process large CSV files using worker and message queue.
     - Websocket for sucess notification.
-  - Server and database within same VPC in a single region
+  - API response caching based on query parameters (client, LB).
+  - Server and database in a single VPC in a single region.
+- Security
+  - Use service account for Google Cloud instead of API Key.
+  - Move the database in a private VPC.
+  - Role based access control for admin users.
 - Deployment
   - Dockerize and deploy server on AWS ECS
   - Deploy client on AWS S3 and Cloudfront CDN (Edge location caching)
@@ -68,6 +78,8 @@ This project is a basic MERN web app that allows admin users to bulk upload, tra
 
 - Clone the repository: `git clone https://github.com/flamefractal/farmer-admin.git`.
 - Install dependencies by running `yarn install` in both the client and server directories.
+- Create a MongoDB cluster on Atlas (or local) and add a user with read/write access.
+- Create a Google Cloud project and enable the Translate API. Create an API key.
 - Create a `.env` file in the `server` directory with the following variables:
   - `API_PORT=5656`
   - `JWT_SECRET`
@@ -120,12 +132,11 @@ We need to make sure that we can build the typescript code of server. And we can
 
 ## API Endpoints
 
-### 1. GET /farmers?language={language}&offset={offset}&limit={limit}
+### 1. GET /farmers?offset={offset}&limit={limit}
 
-Get a list of farmer data in a specific language.
+Get a list of farmers.
 
-- language: Defaults to en. Supports: hi, mr, pa, te.
-- offset: The starting index. Defaults to 0.
+- offset: Skip records. Defaults to 0.
 - limit: Records per page. Defaults to 10.
 
 Response
@@ -170,21 +181,21 @@ Request `{ "username": "admin", "password": "password" }`
 
 Response `{ "token": "eyJhbGciOiJ..." }`
 
-### 4. POST /auth/register
+### 5. POST /auth/register
 
 Create a new admin user.
 
 Request `{ "username": "admin", "password": "password" }`
 
-### 5. GET /auth/me
+### 6. GET /auth/me
 
 Get the current user's details based on JWT in Authorization header.
 
 Response `{"username": "admin"}`
 
-### 6. GET /health
+### 7. GET /health
 
-Check the health of the API.
+Check the API is up and running.
 
 ## License
 

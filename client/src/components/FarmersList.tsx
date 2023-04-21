@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableHead, TableRow,
-  Typography, Select, MenuItem, Button, Grid, TextField, ButtonGroup,
+  Typography, Button, Grid, TextField, ButtonGroup,
 } from '@mui/material';
 import axios from '../axiosConfig';
 import { IFarmer, LanguageCodesToNames } from '../interfaces';
@@ -26,7 +26,7 @@ export default function FarmersList() {
   useEffect(() => {
     setLoading(true);
 
-    axios.get(`/farmers?language=${language}&offset=${(page - 1) * perPage}&limit=${perPage}`)
+    axios.get(`/farmers?offset=${(page - 1) * perPage}&limit=${perPage}`)
       .then((response) => {
         setFarmers(response.data);
       })
@@ -34,7 +34,7 @@ export default function FarmersList() {
         setLoading(false);
         setPageNumberInput(page.toString());
       });
-  }, [language, page]);
+  }, [page]);
 
   let content = null;
 
@@ -43,10 +43,10 @@ export default function FarmersList() {
       <TableRow key={farmer.phone_number}>
         <TableCell>{ (page - 1) * perPage + (index + 1) }</TableCell>
         <TableCell>{farmer.phone_number}</TableCell>
-        <TableCell>{(farmer.translations[language] ?? {}).farmer_name}</TableCell>
-        <TableCell>{(farmer.translations[language] ?? {}).state_name}</TableCell>
-        <TableCell>{(farmer.translations[language] ?? {}).district_name}</TableCell>
-        <TableCell>{(farmer.translations[language] ?? {}).village_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? farmer).farmer_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? farmer).state_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? farmer).district_name}</TableCell>
+        <TableCell>{(farmer.translations[language] ?? farmer).village_name}</TableCell>
       </TableRow>
     ));
   } else {
@@ -57,19 +57,12 @@ export default function FarmersList() {
     <Box className="farmers-list" sx={{ maxWidth: '70%' }}>
       <Box display="flex" alignItems="center" mb={2}>
         <Typography variant="body1" mr={1}>Select language:</Typography>
-        <Select
-          sx={{
-            minHeight: '10px',
-          }}
-          value={language}
-          onChange={(e) => {
-            setLanguage(e.target.value);
-          }}
-        >
+
+        <ButtonGroup variant="outlined">
           {Object.entries(LanguageCodesToNames).map(([code, name]) => (
-            <MenuItem key={code} value={code}>{name}</MenuItem>
+            <Button variant="contained" disabled={language === code} onClick={() => setLanguage(code)}>{name}</Button>
           ))}
-        </Select>
+        </ButtonGroup>
       </Box>
 
       <Box sx={{ minHeight: '20rem' }}>
@@ -113,7 +106,7 @@ export default function FarmersList() {
 
         <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
           <ButtonGroup variant="outlined">
-            <Button variant="contained" disabled={page === Number(pageNumberInput)} onClick={() => setPage(Number(pageNumberInput))}>
+            <Button variant="contained" disabled={isLoading || page === Number(pageNumberInput)} onClick={() => setPage(Number(pageNumberInput))}>
               Jump To Page
             </Button>
 
@@ -121,7 +114,10 @@ export default function FarmersList() {
               type="number"
               size="small"
               value={pageNumberInput}
-              onChange={(e) => setPageNumberInput(e.target.value)}
+              onChange={(e) => (Number(e.target.value) < 1
+                ? setPageNumberInput('1')
+                : setPageNumberInput(e.target.value)
+              )}
               style={{ width: '4rem' }}
               InputProps={{ inputProps: { min: 1, max: Math.ceil(totalCount / perPage) } }}
             />

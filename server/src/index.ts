@@ -86,8 +86,7 @@ app.get('/farmers/count', async (req, res) => {
 
 app.get('/farmers', async (req, res) => {
   try {
-    const farmers = await FarmerController.getFarmersByLanguage(
-      req.query.language as string,
+    const farmers = await FarmerController.getFarmers(
       parseInt(req.query.offset as string, 10),
       parseInt(req.query.limit as string, 10),
     );
