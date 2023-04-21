@@ -55,6 +55,22 @@ export default function UploadCsv() {
             sample.csv
           </a>
         </Typography>
+
+        <p>
+          <strong>CSV Format:</strong>
+          <ul>
+            <li>
+              have following columns in this order:
+              phone_number, farmer_name, state_name, district_name, village_name
+
+            </li>
+            <li>have a header row.</li>
+            <li>have data in all the columns.</li>
+            <li>have all the data in English.</li>
+            <li>have unique phone_number for each farmer.</li>
+            <li>have row count maximum in the order of 1000s.</li>
+          </ul>
+        </p>
       </Grid>
 
       <Grid item xs={12}>

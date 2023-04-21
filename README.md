@@ -21,6 +21,16 @@ It is deployed online at https://farmer-admin-client.herokuapp.com/.
   - [7. GET /health](#7-get-health)
 - [License](#license)
 
+## Assumptions
+
+- CSV Format
+  - have following columns in this order: phone_number, farmer_name, state_name, district_name, village_name
+  - have a header row.
+  - have data in all the columns.
+  - have all the data in English.
+  - have unique phone_number for each farmer.
+  - have row count maximum in the order of 1000s.
+
 ## Key Features
 
 - Functional
@@ -40,7 +50,7 @@ It is deployed online at https://farmer-admin-client.herokuapp.com/.
   - Use transliteration for better results for proper nouns.
     - Forcing `"from:en"` helps somewhat.
     - Google's Transliteration API is deprecated.
-  - Validating english data against government database of cities, distrcts, villages.
+  - Validating english data against government database of cities, distrcts, villages ([OGD](https://data.gov.in/), [LGD](https://lgdirectory.gov.in/)) to catch misspelings and errors.
   - Returning CSV of records that failed to upsert.
   - Allow exporting of farmer data.
   - Allowing admin users to edit farmer data.
