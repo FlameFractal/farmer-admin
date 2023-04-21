@@ -13,12 +13,23 @@ dotenv.config();
 
 import FarmerController from './controllers/farmer';
 import AuthController from './controllers/auth';
+import { IUser } from './interfaces';
 
 const port = process.env.PORT || 5656;
 const upload = multer({ dest: 'uploads/' });
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+
+// TODO: Move to types.d.ts
+// Extend the Express Request interface to include the user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser;
+    }
+  }
+}
 
 // Declare the API routes
 
@@ -43,6 +54,21 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+// Authentication middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not set!');
+
+    const token = req.headers.authorization?.split(' ')[1] || '';
+    jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = jwt.decode(token) as IUser;
+    next();
+  } catch (error: any) {
+    res.status(401).json({ message: `Invalid token. ${error.message}` });
+  }
+});
+
 app.post('/auth/register', async (req, res) => {
   try {
     if (!req.body || !req.body.username || !req.body.password) {
@@ -60,19 +86,8 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Authentication middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1] || '';
-    jwt.verify(token, process.env.JWT_SECRET || '');
-    next();
-  } catch (error: any) {
-    res.status(401).json({ message: `Invalid token. ${error.message}` });
-  }
-});
-
-app.get('/auth/me', async (_, res) => {
-  res.send({ username: 'admin' });
+app.get('/auth/me', async (req, res) => {
+  res.send(req.user);
 });
 
 app.get('/farmers/count', async (req, res) => {

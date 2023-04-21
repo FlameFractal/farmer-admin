@@ -15,7 +15,13 @@ export default class AuthController {
       throw new Error('Invalid username or password');
     }
 
-    const token = jwt.sign({ username }, process.env.JWT_SECRET || '', { expiresIn: '24h' });
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not set!');
+
+    const token = jwt.sign(
+      { username, id: user.id, createdAt: user.createdAt },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' },
+    );
     return token;
   }
 

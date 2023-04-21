@@ -53,6 +53,7 @@ It is deployed online at https://farmer-admin-client.herokuapp.com/.
     - Async process large CSV files using worker and message queue.
     - Websocket for sucess notification.
   - API response caching based on query parameters (client, LB).
+  - GZIP compression for API responses.
   - Server and database in a single VPC in a single region.
 - Security
   - Use service account for Google Cloud instead of API Key.
@@ -177,15 +178,15 @@ Request: Form-data with the CSV file containing the farmer data
 
 Authenticate the user and generate a JWT token.
 
-Request `{ "username": "admin", "password": "password" }`
+Request `{ "username": "admin", "password": "admin" }`
 
 Response `{ "token": "eyJhbGciOiJ..." }`
 
 ### 5. POST /auth/register
 
-Create a new admin user.
+Create a new user. Only existing admin users can create new users.
 
-Request `{ "username": "admin", "password": "password" }`
+Request `{ "username": "admin", "password": "admin" }`
 
 ### 6. GET /auth/me
 
