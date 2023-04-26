@@ -50,7 +50,7 @@ app.post('/auth/login', async (req, res) => {
 
     res.status(200).send({ token });
   } catch (error: any) {
-    res.status(500).send({ message: `Error logging in! ${error.message}` });
+    res.status(401).send({ message: `Error logging in! ${error.message}` });
   }
 });
 
